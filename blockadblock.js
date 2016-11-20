@@ -5,7 +5,18 @@
  * https://github.com/sitexw/BlockAdBlock
  */
 
-(function(window) {
+(function (root, factory) {
+	if (typeof define === 'function' && define.amd) {
+		define([], factory);
+	} else if (typeof module === 'object' && module.exports) {
+		module.exports = factory();
+	} else {
+		root.BlockAdBlock = factory();
+		if (root.blockAdBlock === undefined) {
+			root.blockAdBlock = root.BlockAdBlock.createDefault();
+		}
+	}
+}(this, function () {
 	var BlockAdBlock = function(options) {
 		this._options = {
 			checkOnLoad:		false,
@@ -52,11 +63,11 @@
 	BlockAdBlock.prototype._options = null;
 	BlockAdBlock.prototype._var = null;
 	BlockAdBlock.prototype._bait = null;
-	
+
 	BlockAdBlock.prototype._log = function(method, message) {
 		console.log('[BlockAdBlock]['+method+'] '+message);
 	};
-	
+
 	BlockAdBlock.prototype.setOption = function(options, value) {
 		if(value !== undefined) {
 			var key = options;
@@ -71,7 +82,7 @@
 		}
 		return this;
 	};
-	
+
 	BlockAdBlock.prototype._creatBait = function() {
 		var bait = document.createElement('div');
 			bait.setAttribute('class', this._options.baitClass);
@@ -98,7 +109,7 @@
 			this._log('_destroyBait', 'Bait has been removed');
 		}
 	};
-	
+
 	BlockAdBlock.prototype.check = function(loop) {
 		if(loop === undefined) {
 			loop = true;
@@ -195,7 +206,7 @@
 			this._log('_stopLoop', 'A loop has been stopped');
 		}
 	};
-	
+
 	BlockAdBlock.prototype.emitEvent = function(detected) {
 		if(this._options.debug === true) {
 			this._log('emitEvent', 'An event with a '+(detected===true?'positive':'negative')+' detection was called');
@@ -223,7 +234,7 @@
 			this._log('clearEvent', 'The event list has been cleared');
 		}
 	};
-	
+
 	BlockAdBlock.prototype.on = function(detected, fn) {
 		this._var.event[(detected===true?'detected':'notDetected')].push(fn);
 		if(this._options.debug === true) {
@@ -239,12 +250,12 @@
 		return this.on(false, fn);
 	};
 	
-	window.BlockAdBlock = BlockAdBlock;
-	
-	if(window.blockAdBlock === undefined) {
-		window.blockAdBlock = new BlockAdBlock({
+	BlockAdBlock.createDefault = function() {
+		return new BlockAdBlock({
 			checkOnLoad: true,
 			resetOnEnd: true
 		});
-	}
-})(window);
+	};
+	
+	return BlockAdBlock;
+}));
